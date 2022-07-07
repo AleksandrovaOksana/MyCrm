@@ -4,9 +4,10 @@ export default {
         async login({dispatch, commit}, {email, password}){
             try{
                 const result = await axios.post('http://crm.test/api/auth/login', {email, password}) 
-                const token = result.data.access_token
-                localStorage.setItem('access_token', token)
-                  console.log(dispatch, commit, result)
+                commit('setToken', result.data)
+                
+                  console.log(dispatch)
+  
             } catch (e){
                 commit('setError', e)
                 throw e
@@ -15,12 +16,9 @@ export default {
         async register({dispatch, commit}, {email, password, name}) {
             try{
                 const result = await axios.post('http://crm.test/api/auth/register', {email, password, name})
-                const token = result.data.access_token
-                localStorage.setItem('access_token', token)
-                const config ={ headers: {"Authorization" : `Bearer ${localStorage.getItem('access_token')}`} };
-                const uid = await dispatch('getUid', config)
-                await axios.post('http://crm.test/api/account/store', {total: 10000, uid: uid}, config).then((response) => {
-                    console.log(response.data);
+                commit('setToken', result.data)
+                const uid = await dispatch('getUid', this.$store.getters.configRequestHeaders)
+                await axios.post('http://crm.test/api/account/store', {total: 10000, uid: uid}, this.$store.getters.configRequestHeaders).then((response) => {
                     if(response.data.uid){
                         this.$message('Начальный аккаунт успешно создан')
                     }
@@ -35,7 +33,6 @@ export default {
         },
         async getUid({dispatch}, config) {
             const user = await axios.get('http://crm.test/api/auth/me',config).then((response) => {
-                
                 return response.data
             })
             console.log(dispatch, user)
@@ -46,5 +43,19 @@ export default {
                 console.log(response)
             })
         }
+    },
+    async refreshToken(){
+        const response = await axios.get('http://crm.test/api/auth/refresh', this.$store.getters.configRequestHeaders)
+        commit('setToken', response.data)
+        this.autoRefresh()
+    },
+    autoRefresh(){
+        setTimeout(this.refreshToken, this.$store.getters.token.expires_in * 1000)
+        const token = {
+            "access_token": this.$store.getters.token.access_token,
+            "token_type": this.$store.getters.token.token_type,
+            "expires_in": this.$store.getters.token.expires_in - 1
+        }
+        commit('setToken', token)
     }
 }

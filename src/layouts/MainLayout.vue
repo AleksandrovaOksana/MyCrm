@@ -22,7 +22,6 @@
 <script>
 import Navbar from '@/components/app/NavbarView.vue'
 import Sidebar from '@/components/app/SidebarView.vue'
-import axios from 'axios'
 export default {
     name: 'main-layout',
     data: () => ({
@@ -31,15 +30,9 @@ export default {
     components: {
         Navbar, Sidebar
     },
-    async created() {
-      if (localStorage.getItem('access_token')){
-        const config ={ headers: {"Authorization" : `Bearer ${localStorage.getItem('access_token')}`} };
-        try{
-          await axios.get('http://crm.test/api/auth/me',config)
-        } catch(e){
-            const response = await axios.get('http://crm.test/api/auth/refresh',config)
-            localStorage.setItem('access_token', response.data.access_token)
-        }
+    beforeCreate() {
+      if (this.$store.getters.token.expires_in <= 0) {
+        dispatch('refreshToken')
       }
     }
 
