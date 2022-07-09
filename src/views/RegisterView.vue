@@ -7,34 +7,37 @@
             id="email"
             type="text"
             v-model.trim="email"
-            :class="{invalid: $v.email.required.$invalid || $v.email.email.$invalid}"  
+            :class="{invalid:$v.email.$silentErrors.length}"  
         >
         <label for="email">Email</label>
-      
-            <small class="helper-text invalid" v-if="$v.email.required.$invalid || $v.email.email.$invalid" >Введите корректный email</small>
-  
+        <div  v-for="error of $v.email.$silentErrors" :key="error.$uid">
+            <small class="helper-text invalid">{{this.translateErrorValidates(error.$validator)}}</small>
+
         </div>
+    </div>
     <div class="input-field">
         <input
             id="password"
             type="password"
             v-model.trim="password"
-            :class="{invalid:$v.password.required.$invalid || $v.password.min.$invalid}"  
+            :class="{invalid:$v.password.$silentErrors.length}"  
         >
         <label for="password">Пароль</label>
-    
-                <small class="helper-text invalid" v-if="$v.password.required.$invalid || $v.password.min.$invalid">Введите корректный пароль </small>
-            
-        </div>
+        <div v-for="error of $v.password.$silentErrors" :key="error.$uid">
+            <small class="helper-text invalid">{{(error.$validator == 'min') ? this.translateErrorValidates(error.$validator) + $v.password.min.$params.min : this.translateErrorValidates(error.$validator) }} </small>
+        </div>   
+    </div>
     <div class="input-field">
       <input
           id="name"
           type="text"
           v-model.trim="name"
-          :class="{invalid:$v.name.required.$invalid}"  
+          :class="{invalid:$v.name.$silentErrors.length}"  
       >
       <label for="name">Имя</label>
-      <small class="helper-text invalid" v-if="$v.name.required.$invalid">Введите имя</small>
+      <div v-for="error of $v.name.$silentErrors" :key="error.$uid">
+      <small class="helper-text invalid">{{this.translateErrorValidates(error.$validator)}}</small>
+      </div>
     </div>
     <p>
       <label>
@@ -63,42 +66,48 @@
 </template>
 <script>
 import useVuelidate from '@vuelidate/core'
-import {email, required, minLength} from 'vuelidate/lib/validators'
+import {email, required, minLength} from '@vuelidate/validators'
+import formValidatesMessages from '@/utils/formValidatesMessages.plugin'
+
 export default {
   setup () {
-            return { v$: useVuelidate() }
+            return { $v: useVuelidate() }
         },
         name: 'register-page',
         data (){
             return {
-                $v: useVuelidate(),
-                email: '',
-                password: '',
-                name: '',
-                agree: false
+              email: '',
+              password: '',
+              name: '',
+              agree: false
             }
         },
-        validations: {
-                email: {email, required},
-                password: {required, min: minLength(3)},
-                name: {required},
-                agree: {cheked: v => v}
+        validations() {
+          return {
+            email: {email, required},
+            password: {required, min: minLength(3)},
+            name: {required},
+            agree: {cheked: v => v}
+            }
         },
         methods: {
           async submitHandler(){
-                const isFormCorrect = await this.v$.$validate()
-                if (!isFormCorrect) return
-                const formData = {
-                    email: this.email,
-                    password: this.password,
-                    name: this.name
-                }
-                try{
-                await this.$store.dispatch('register', formData)
-                this.$router.push('/')
-                } catch (e) {console.log(e) }
-               
+            const isFormCorrect = await this.v$.$validate()
+            if (!isFormCorrect) return
+            const formData = {
+                email: this.email,
+                password: this.password,
+                name: this.name
+            }
+            try{
+            await this.$store.dispatch('register', formData)
+            this.$router.push('/')
+            } catch (e) {console.log(e) }
+            },
+            translateErrorValidates(validator) {
+                return formValidatesMessages.getErrorValidate(validator)   
             }
         }
+         
 }
 </script>

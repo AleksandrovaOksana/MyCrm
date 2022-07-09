@@ -5,7 +5,7 @@ export default {
             try{
                 const result = await axios.post('http://crm.test/api/auth/login', {email, password}) 
                 commit('setToken', result.data)
-                
+                dispatch ('autoRefresh')
                   console.log(dispatch)
   
             } catch (e){
@@ -17,6 +17,7 @@ export default {
             try{
                 const result = await axios.post('http://crm.test/api/auth/register', {email, password, name})
                 commit('setToken', result.data)
+                dispatch ('autoRefresh')
                 const uid = await dispatch('getUid', this.$store.getters.configRequestHeaders)
                 await axios.post('http://crm.test/api/account/store', {total: 10000, uid: uid}, this.$store.getters.configRequestHeaders).then((response) => {
                     if(response.data.uid){
@@ -42,20 +43,23 @@ export default {
             await axios.get('http://crm.test/api/auth/logout').then((response) => {
                 console.log(response)
             })
+        },
+        async refreshToken({commit}){
+            const response = await axios.get('http://crm.test/api/auth/refresh', this.$store.getters.configRequestHeaders)
+            commit('setToken', response.data)
+            this.autoRefresh()
+        },
+        autoRefresh({commit, state }){
+            console.log(state)
+            // setTimeout(this.refreshToken, this.$store.getters.token.expires_in * 1000)
+
+            // const token = {
+            //     "access_token": this.$store.getters.token.access_token,
+            //     "token_type": this.$store.getters.token.token_type,
+            //     "expires_in": this.$store.getters.token.expires_in - 1
+            // }
+            // commit('setToken', token)
         }
-    },
-    async refreshToken({commit}){
-        const response = await axios.get('http://crm.test/api/auth/refresh', this.$store.getters.configRequestHeaders)
-        commit('setToken', response.data)
-        this.autoRefresh()
-    },
-    autoRefresh({commit}){
-        setTimeout(this.refreshToken, this.$store.getters.token.expires_in * 1000)
-        const token = {
-            "access_token": this.$store.getters.token.access_token,
-            "token_type": this.$store.getters.token.token_type,
-            "expires_in": this.$store.getters.token.expires_in - 1
-        }
-        commit('setToken', token)
     }
+   
 }

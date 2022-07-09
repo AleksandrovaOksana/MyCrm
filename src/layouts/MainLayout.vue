@@ -31,9 +31,9 @@ export default {
         Navbar, Sidebar
     },
     beforeCreate() {
-      if (this.$store.getters.token.expires_in <= 0) {
-        this.$store.dispatch('refreshToken')
-      }
+      // if (this.$store.getters.token.expires_in <= 0) {
+      //   this.$store.dispatch('refreshToken')
+      // }
     }
 
 }
