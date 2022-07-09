@@ -24,7 +24,7 @@ export default createStore({
     clearConfigRequestHeaders(state){
       state.configRequestHeaders = null
     },
-    setToken(state, token){
+    setToken({state, commit}, token){
       state.token = token
       const config ={ headers: {"Authorization" : `Bearer ${token.access_token}`} };
       commit('setConfigRequestHeaders', config)

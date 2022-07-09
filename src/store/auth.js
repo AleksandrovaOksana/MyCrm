@@ -44,12 +44,12 @@ export default {
             })
         }
     },
-    async refreshToken(){
+    async refreshToken({commit}){
         const response = await axios.get('http://crm.test/api/auth/refresh', this.$store.getters.configRequestHeaders)
         commit('setToken', response.data)
         this.autoRefresh()
     },
-    autoRefresh(){
+    autoRefresh({commit}){
         setTimeout(this.refreshToken, this.$store.getters.token.expires_in * 1000)
         const token = {
             "access_token": this.$store.getters.token.access_token,
