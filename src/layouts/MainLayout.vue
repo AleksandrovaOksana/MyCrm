@@ -32,7 +32,7 @@ export default {
     },
     beforeCreate() {
       if (this.$store.getters.token.expires_in <= 0) {
-        dispatch('refreshToken')
+        this.$store.dispatch('refreshToken')
       }
     }
 
