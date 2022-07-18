@@ -16,7 +16,7 @@
                 data-target="dropdown"
                 ref="dropdown"
             >
-              USER NAME
+              {{this.user ? this.user.name : 'USER NAME'}}
               <i class="material-icons right">arrow_drop_down</i>
             </a>
 
@@ -46,6 +46,7 @@ export default {
     date: new Date(),
     interval: null,
     dropdown: null,
+    user: null
   }),
   methods: {
     async logout() {
@@ -53,13 +54,16 @@ export default {
       this.$router.push('/login?message=logout')
     }
   },
-  mounted() {
+   mounted() {
     this.interval = setInterval(() =>{
       this.date = new Date()
     },1000)
     this.dropdown = M.Dropdown.init(this.$refs.dropdown,{
       constrainWidth: false
     })
+     const user =   this.$store.getters.user
+     this.user = user
+     console.log(user)
   },
   beforeUnmount() {
     clearInterval(this.interval)

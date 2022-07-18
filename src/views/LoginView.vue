@@ -61,10 +61,10 @@ import formValidatesMessages from '@/utils/formValidatesMessages.plugin'
         setup () {
             return { 
                 v$: useVuelidate() 
-                }
+            }
         },
         name: 'login-page',
-        data () {
+        data() {
             return {
                 email: '',
                 password: '',
@@ -91,6 +91,7 @@ import formValidatesMessages from '@/utils/formValidatesMessages.plugin'
                 }
                 try{
                     await this.$store.dispatch('login', formData)
+  
                     this.$router.push('/')
                 } catch(e) {console.error(e)}
                 

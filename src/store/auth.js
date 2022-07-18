@@ -1,43 +1,42 @@
 import axios from 'axios'
 export default {
     actions: {
-        async login({dispatch, commit}, {email, password}){
+        async login(context, {email, password}){
             try{
                 const result = await axios.post('http://crm.test/api/auth/login', {email, password}) 
-                commit('setToken', result.data)
-                dispatch ('autoRefresh')
-                  console.log(dispatch)
+
+                await context.commit('setToken', result.data)
+                const user = await context.dispatch('getUser', context.getters.configRequestHeaders)
+                await context.commit('setUser', user)
   
             } catch (e){
-                commit('setError', e)
+                context.commit('setError', e)
                 throw e
             }
         },
-        async register({dispatch, commit}, {email, password, name}) {
+        async register(context, {email, password, name}) {
             try{
                 const result = await axios.post('http://crm.test/api/auth/register', {email, password, name})
-                commit('setToken', result.data)
-                dispatch ('autoRefresh')
-                const uid = await dispatch('getUid', this.$store.getters.configRequestHeaders)
-                await axios.post('http://crm.test/api/account/store', {total: 10000, uid: uid}, this.$store.getters.configRequestHeaders).then((response) => {
+                await context.commit('setToken', result.data)
+                await context.dispatch ('autoRefresh')
+                const user = await context.dispatch('getUser', context.getters.configRequestHeaders)
+                await context.commit('setUser', user)
+                await axios.post('http://crm.test/api/account/store', {total: 10000, uid: user.id}, context.getters.configRequestHeaders).then((response) => {
                     if(response.data.uid){
                         this.$message('Начальный аккаунт успешно создан')
                     }
 
                 })
-                  console.log(dispatch)
             } catch (e){
-                commit('setError', e)
+                context.commit('setError', e)
                 throw e
             }
             
         },
-        async getUid({dispatch}, config) {
-            const user = await axios.get('http://crm.test/api/auth/me',config).then((response) => {
-                return response.data
-            })
-            console.log(dispatch, user)
-            return user ? user.id : null
+        async getUser({}, config) {
+            const response = await axios.get('http://crm.test/api/auth/me',config)
+            const user = response.data.user
+            return user ? user : null
         },
         async logout() {
             await axios.get('http://crm.test/api/auth/logout').then((response) => {
@@ -49,8 +48,8 @@ export default {
             commit('setToken', response.data)
             this.autoRefresh()
         },
-        autoRefresh({commit, state }){
-            console.log(state)
+        autoRefresh(context){
+            console.log(context)
             // setTimeout(this.refreshToken, this.$store.getters.token.expires_in * 1000)
 
             // const token = {

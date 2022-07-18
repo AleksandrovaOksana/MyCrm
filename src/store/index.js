@@ -1,18 +1,31 @@
 import { createStore } from 'vuex'
 import auth from './auth'
+import category from './category'
+import account from './account'
+import record from './record'
 
 export default createStore({
   state: {
     error: null,
     configRequestHeaders: null,
-    token: null
+    token: null,
+    user: null,
+    account: null
   },
   getters: {
     error: s => s.error,
     configRequestHeaders: s => s.configRequestHeaders,
-    token: s => s.token
+    token: s => s.token,
+    user: s => s.user,
+    account: s => s.account
   },
   mutations: {
+    setUser(state, user){
+      state.user = user
+    },
+    setAccount(state, account) {
+      state.account = account
+    },
     setError(state, error) {
       state.error = error
     },
@@ -24,15 +37,18 @@ export default createStore({
     clearConfigRequestHeaders(state){
       state.configRequestHeaders = null
     },
-    setToken(state, token){
+    async setToken(state, token){
+
       state.token = token
       const config ={ headers: {"Authorization" : `Bearer ${token.access_token}`} };
-      this.commit('setConfigRequestHeaders', config)
+      await this.commit('setConfigRequestHeaders', config)
+
     }
   },
   actions: {
+    
   },
   modules: {
-    auth
+    auth, category, account, record
   }
 })

@@ -15,7 +15,8 @@
           <span class="card-title">Счет в валюте</span>
 
           <p class="currency-line">
-            <span>12.0 Р</span>
+            <span v-if="this.account">{{this.account.total}} Р</span>
+            <span v-else>Нет данных</span>
           </p>
         </div>
       </div>
@@ -57,5 +58,12 @@
 
 export default {
   name: 'HomeView',
+  data: () => ({
+    account: null
+  }),
+  async mounted(){
+     const result = await this.$store.dispatch('getAccount')
+     this.account = result
+  }
 }
 </script>
