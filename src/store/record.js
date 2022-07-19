@@ -10,11 +10,22 @@ export default{
                 throw e
             }
         },
-        async fetchRecords(context) {
+        async fetchRecords(context, page) {
             try {
                 const config = await context.getters.configRequestHeaders
-                const result = await axios.get('http://crm.test/api/transaction', config) 
-                return result.data.transactions
+                const result = await axios.get('http://crm.test/api/transaction?page=' + page, config)
+                return result.data
+            } catch (e) {
+                context.commit('setError', e)
+                throw e
+            }
+        },
+        async fetchRecordById(context, id) {
+            try {
+                const config = await context.getters.configRequestHeaders
+                const result = await axios.get('http://crm.test/api/transaction/' + id, config)
+                const record = result.data
+                return {...record, id}
             } catch (e) {
                 context.commit('setError', e)
                 throw e

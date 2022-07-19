@@ -13,6 +13,19 @@ export default{
                 throw e
             }
         },
+        async fetchCategoryById(context, id){
+            try {
+                const config = await context.getters.configRequestHeaders
+                const result = await axios.get('http://crm.test/api/category/' + id, config) 
+                const category = result.data
+                return {...category, id}
+                
+                
+            }catch (e) {
+                await context.commit('setError', e)
+                throw e
+            }
+        },
         async updateCategory(context, {title, limit, id}) {
             try {
                 
